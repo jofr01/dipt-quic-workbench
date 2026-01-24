@@ -2,10 +2,9 @@
 set -e
 
 # --- Configuration ---
-PCAP_NS3_DIR="../logs/queue-dynamics/ns-3"
-PCAP_WB_DIR="../logs/queue-dynamics/workbench"
-PYTHON_SCRIPT="./plot_throughput_validation.py"
-OUTPUT_FILE="validation_throughput_comparison.pdf"
+PCAP_WB_DIR="../logs/channel-characteristics/no-loss"
+PYTHON_SCRIPT="./plot_throughput_verification.py"
+OUTPUT_FILE="verification_throughput.pdf"
 LINK_CAPACITY=2
 
 # Create Workspace
@@ -47,13 +46,11 @@ extract_csv() {
 }
 
 # Run extraction for both files
-extract_csv "$PCAP_NS3_DIR" "ns3" "NS-3"
 extract_csv "$PCAP_WB_DIR" "wb" "Workbench"
 
 # Plot results with python
 echo "--- Generating Plot ---"
 python3 "$PYTHON_SCRIPT" \
-    --ns3-dir "$TMP_DIR/ns3" \
     --wb-dir "$TMP_DIR/wb" \
     --output "$OUTPUT_FILE" \
     --capacity "$LINK_CAPACITY"

@@ -4,7 +4,7 @@
         {
             "id": "Client",
             "type": "host",
-            "bufferSizeBytes": 37500,
+            "bufferSizeBytes": 50000000,
             "interfaces": [
                 {
                     "addresses": [
@@ -19,8 +19,8 @@
                 "initial_rtt_ms": 333,
                 "maximum_idle_timeout_ms": 30000,
                 "packet_threshold": 3,
-                "mtu_discovery": true,
-                "maximize_send_and_receive_windows": false,
+                "mtu_discovery": false,
+                "maximize_send_and_receive_windows": true,
                 "max_ack_delay_ms": 25,
                 "ack_eliciting_threshold": 1,
                 "congestion_controller": "cubic",
@@ -31,7 +31,7 @@
         {
             "id": "Server",
             "type": "host",
-            "bufferSizeBytes": 37500,
+            "bufferSizeBytes": 50000000,
             "interfaces": [
                 {
                     "addresses": [
@@ -46,8 +46,8 @@
                 "initial_rtt_ms": 333,
                 "maximum_idle_timeout_ms": 30000,
                 "packet_threshold": 3,
-                "mtu_discovery": true,
-                "maximize_send_and_receive_windows": false,
+                "mtu_discovery": false,
+                "maximize_send_and_receive_windows": true,
                 "max_ack_delay_ms": 25,
                 "ack_eliciting_threshold": 1,
                 "congestion_controller": "cubic",
