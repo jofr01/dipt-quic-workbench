@@ -4,3 +4,6 @@
 *.key
 *.qlog
 replay-log.json
+
+!plots/**/*.pcap
+!plots/**/*.qlog

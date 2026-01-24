@@ -1,0 +1,75 @@
+{
+    "type": "NetworkGraph",
+    "nodes": [
+        {
+            "id": "Earth",
+            "type": "host",
+            "bufferSizeBytes": 150000,
+            "interfaces": [
+                {
+                    "addresses": [
+                        {
+                            "address": "192.168.40.1/24"
+                        }
+                    ],
+                    "routes": []
+                }
+            ],
+            "quic": {
+                "initial_rtt_ms": 500000,
+                "maximum_idle_timeout_ms": 1000000,
+                "packet_threshold": 3,
+                "mtu_discovery": false,
+                "maximize_send_and_receive_windows": true,
+                "max_ack_delay_ms": 25,
+                "ack_eliciting_threshold": 10,
+                "congestion_controller": "new_reno",
+                "initial_congestion_window_packets": 10,
+                "enable_qlog": true
+            }
+        },
+        {
+            "id": "Mars",
+            "type": "host",
+            "bufferSizeBytes": 150000,
+            "interfaces": [
+                {
+                    "addresses": [
+                        {
+                            "address": "192.168.40.2/24"
+                        }
+                    ],
+                    "routes": []
+                }
+            ],
+            "quic": {
+                "initial_rtt_ms": 500000,
+                "maximum_idle_timeout_ms": 1000000,
+                "packet_threshold": 3,
+                "mtu_discovery": false,
+                "maximize_send_and_receive_windows": true,
+                "max_ack_delay_ms": 25,
+                "ack_eliciting_threshold": 10,
+                "congestion_controller": "new_reno",
+                "initial_congestion_window_packets": 10,
+                "enable_qlog": true
+            }
+        }
+    ],
+    "links": [
+      {
+        "id": "Earth->Mars",
+        "source": "192.168.40.1",
+        "target": "192.168.40.2",
+        "delay_ms": 240000,
+        "bandwidth_bps": 2000000
+      },
+      {
+        "id": "Mars->Earth",
+        "source": "192.168.40.2",
+        "target": "192.168.40.1",
+        "delay_ms": 240000,
+        "bandwidth_bps": 2000000
+      }
+    ]
+}
