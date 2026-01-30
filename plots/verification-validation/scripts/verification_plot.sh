@@ -6,6 +6,7 @@ PCAP_WB_DIR="../logs/channel-characteristics/no-loss"
 PYTHON_SCRIPT="./plot_throughput_verification.py"
 OUTPUT_FILE="verification_throughput.pdf"
 LINK_CAPACITY=2
+SENDER="192.168.40.2"
 
 # Create Workspace
 TMP_DIR=$(mktemp -d)
@@ -36,7 +37,7 @@ extract_csv() {
         outfile="$TMP_DIR/$output_subdir/${filename}.csv"
         
         cat "$pcap" | tshark -r - \
-               -Y "quic" \
+               -Y "ip.src == $SENDER" \
                -T fields \
                -e frame.time_relative -e ip.len \
                -E separator=, \
