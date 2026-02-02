@@ -5,5 +5,4 @@
 *.qlog
 replay-log.json
 
-!plots/**/*.pcap
-!plots/**/*.qlog
+!plots/verification-validation/logs/queue-dynamics/ns-3/*.pcap
