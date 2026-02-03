@@ -26,7 +26,7 @@ def parse_input_arg(arg):
         raise argparse.ArgumentTypeError(f"Input must be 'Label=Path/to/file.csv'. Got: {arg}")
 
 # Load csv, calc troughout and return data frame
-def load_and_process(path, label, bin_size=1.0):
+def load_and_process(path, label, bin_size):
     try:
         df = pd.read_csv(path)
 
@@ -64,6 +64,7 @@ def main():
     parser.add_argument("--title", required=True, help="Plot Title")
     parser.add_argument("--capacity", type=float, default=None, help="Link Capacity (Mbps) for reference line")
     parser.add_argument("--xlim", type=float, default=None, help="Limit X-axis (seconds)")
+    parser.add_argument("--binsize", type=float, default=1.0, help="Calculation Intervall (seconds)")
     
     args = parser.parse_args()
 
@@ -71,7 +72,7 @@ def main():
     all_data = []
     for label, path in args.input:
         print(f"Loading {label} from {path}...")
-        df = load_and_process(path, label)
+        df = load_and_process(path, label, args.binsize)
         all_data.append(df)
     
     full_df = pd.concat(all_data) if all_data else pd.DataFrame()
