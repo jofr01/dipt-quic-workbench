@@ -5,4 +5,6 @@
 *.qlog
 replay-log.json
 
+__pycache__/
+
 !plots/verification-validation/logs/queue-dynamics/ns-3/*.pcap
