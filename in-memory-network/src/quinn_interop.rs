@@ -6,7 +6,7 @@ use crate::transmit::OwnedTransmit;
 use cfg_if::cfg_if;
 use parking_lot::Mutex;
 use quinn::udp::{RecvMeta, Transmit};
-use quinn::{AsyncUdpSocket, UdpPoller};
+use quinn::{AsyncUdpSocket, UdpSender};
 use std::fmt::{Debug, Formatter};
 use std::io;
 use std::io::IoSliceMut;
@@ -15,21 +15,37 @@ use std::pin::Pin;
 use std::sync::Arc;
 use std::task::{Context, Poll, ready};
 
-#[derive(Debug)]
-pub struct InMemoryUdpPoller;
+// Sender
+pub struct InMemoryUdpSender {
+    network: Arc<InMemoryNetwork>,
+    node: Arc<Node>,
+    pcap_exporter: Arc<PcapExporter>,
+}
 
-impl UdpPoller for InMemoryUdpPoller {
-    fn poll_writable(self: Pin<&mut Self>, _cx: &mut Context) -> Poll<io::Result<()>> {
+impl Debug for InMemoryUdpSender {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_str("InMemoryUdpSender")
+    }
+}
+
+impl UdpSender for InMemoryUdpSender {
+    fn poll_send(
+        self: Pin<&mut Self>,
+        transmit: &Transmit<'_>,
+        _cx: &mut Context<'_>,
+    ) -> Poll<io::Result<()>> {
+        InMemoryUdpSocket::send_inner(&self.network, &self.node, &self.pcap_exporter, transmit);
         Poll::Ready(Ok(()))
     }
 }
 
+// Socket
 pub struct InMemoryUdpSocket {
     network: Arc<InMemoryNetwork>,
     endpoint: Arc<UdpEndpoint>,
     node: Arc<Node>,
     next_packet_delivery: Mutex<Option<Pin<Box<NextPacketDelivery>>>>,
-    pcap_exporter: PcapExporter,
+    pcap_exporter: Arc<PcapExporter>,
 }
 
 impl Debug for InMemoryUdpSocket {
@@ -49,27 +65,24 @@ impl InMemoryUdpSocket {
             node,
             network: network.clone(),
             next_packet_delivery: Mutex::new(None),
-            pcap_exporter,
+            pcap_exporter: Arc::new(pcap_exporter),
         }
     }
-}
 
-impl AsyncUdpSocket for InMemoryUdpSocket {
-    fn create_io_poller(self: Arc<Self>) -> Pin<Box<dyn UdpPoller>> {
-        Box::pin(InMemoryUdpPoller)
-    }
-
-    fn try_send(&self, transmit: &Transmit) -> io::Result<()> {
-        // We don't have code to handle GSO, so let's ensure transmits are always a single UDP
-        // packet
+    /// Internal logic for sending a packet
+    fn send_inner(
+        network: &Arc<InMemoryNetwork>,
+        node: &Arc<Node>,
+        pcap: &PcapExporter,
+        transmit: &Transmit,
+    ) {
         assert!(transmit.segment_size.is_none());
 
-        // Track in pcap
-        let source_addr = self.node.quic_addr();
-        self.pcap_exporter.track_transmit(source_addr, transmit);
+        let source_addr = node.quic_addr();
+        pcap.track_transmit(source_addr, transmit);
 
-        let data = self.network.in_transit_data(
-            &self.node,
+        let data = network.in_transit_data(
+            node,
             OwnedTransmit {
                 destination: transmit.destination,
                 ecn: transmit.ecn,
@@ -77,14 +90,18 @@ impl AsyncUdpSocket for InMemoryUdpSocket {
                 segment_size: transmit.segment_size,
             },
         );
-        self.network.forward(self.node.clone(), data);
+        
+        network.forward(node.clone(), data);
+    }
 
+    pub fn try_send(&self, transmit: &Transmit) -> io::Result<()> {
+        Self::send_inner(&self.network, &self.node, &self.pcap_exporter, transmit);
         Ok(())
     }
 
-    fn poll_recv(
+    fn poll_recv_impl(
         &self,
-        cx: &mut Context,
+        cx: &mut Context<'_>,
         bufs: &mut [IoSliceMut<'_>],
         meta: &mut [RecvMeta],
     ) -> Poll<io::Result<usize>> {
@@ -126,11 +143,32 @@ impl AsyncUdpSocket for InMemoryUdpSocket {
 
         Poll::Ready(Ok(delivered_len))
     }
+}
+
+impl AsyncUdpSocket for InMemoryUdpSocket {
+    fn create_sender(&self) -> Pin<Box<dyn UdpSender>> {
+        Box::pin(InMemoryUdpSender {
+            network: self.network.clone(),
+            node: self.node.clone(),
+            pcap_exporter: self.pcap_exporter.clone(),
+        })
+    }
+
+    fn poll_recv(
+        &mut self,
+        cx: &mut Context<'_>,
+        bufs: &mut [IoSliceMut<'_>],
+        meta: &mut [RecvMeta],
+    ) -> Poll<io::Result<usize>> {
+        self.poll_recv_impl(cx, bufs, meta)
+    }
 
     fn local_addr(&self) -> io::Result<SocketAddr> {
         Ok(self.endpoint.addr)
     }
 }
+
+// Receive Helper
 
 impl InMemoryUdpSocket {
     pub async fn receive<'a>(
@@ -170,7 +208,7 @@ pub struct UdpPacket<'a> {
 }
 
 pub struct UdpReceive<'a, 'b> {
-    socket: &'a dyn AsyncUdpSocket,
+    socket: &'a InMemoryUdpSocket,
     result: &'b mut BufsAndMeta,
 }
 
@@ -193,13 +231,12 @@ impl Future for UdpReceive<'_, '_> {
 
     fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
         let this = &mut *self;
-
-        let socket = &mut this.socket;
+        let socket = this.socket;
         let bufs = &mut this.result.bufs;
         let meta = &mut this.result.meta;
 
         let mut bufs: Vec<_> = bufs.iter_mut().map(|b| IoSliceMut::new(b)).collect();
-        socket.poll_recv(cx, &mut bufs, meta)
+        socket.poll_recv_impl(cx, &mut bufs, meta)
     }
 }
 
@@ -228,7 +265,7 @@ cfg_if! {
                 Rt::active().spawn(future)
             }
 
-            fn wrap_udp_socket(&self, _: UdpSocket) -> io::Result<Arc<dyn AsyncUdpSocket>> {
+            fn wrap_udp_socket(&self, _: UdpSocket) -> io::Result<Box<dyn AsyncUdpSocket>> {
                 unimplemented!("not used")
             }
 

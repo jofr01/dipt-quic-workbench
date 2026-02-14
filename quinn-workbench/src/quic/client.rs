@@ -111,7 +111,7 @@ pub fn client_endpoint(
     let mut endpoint = Endpoint::new_with_abstract_socket(
         crate::quic::endpoint_config(seed),
         None,
-        Arc::new(client_socket),
+        Box::new(client_socket),
         async_rt::active_rt(),
     )
     .context("failed to create client endpoint")?;

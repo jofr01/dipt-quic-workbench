@@ -27,6 +27,7 @@ impl Controller for NoCC {
         _now: Instant,
         _sent: Instant,
         _bytes: u64,
+        _pn: u64,
         _app_limited: bool,
         _rtt: &RttEstimator,
     ) {
@@ -37,7 +38,9 @@ impl Controller for NoCC {
         _now: Instant,
         _sent: Instant,
         _is_persistent_congestion: bool,
+        _is_ecn: bool,
         _lost_bytes: u64,
+        _largest_lost: u64,
     ) {
     }
 

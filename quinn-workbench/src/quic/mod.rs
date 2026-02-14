@@ -6,7 +6,7 @@ use crate::quinn_extensions::ecn_cc::EcnCcFactory;
 use crate::quinn_extensions::no_cc::NoCCConfig;
 use crate::util::{print_link_stats, print_max_buffer_usage_per_node, print_node_stats};
 use anyhow::Context;
-use quinn_proto::congestion::{BbrConfig, CubicConfig, NewRenoConfig};
+use quinn_proto::congestion::{Bbr3Config, CubicConfig, NewRenoConfig};
 use quinn_proto::{AckFrequencyConfig, EndpointConfig, QlogConfig, TransportConfig, VarInt};
 use std::fs;
 use std::fs::File;
@@ -119,7 +119,7 @@ fn transport_config(quinn_config: &QuinnJsonConfig, node_id: &str) -> TransportC
                 Arc::new(cfg)
             }
             CongestionControlAlgorithm::Bbr => {
-                let mut cfg = BbrConfig::default();
+                let mut cfg = Bbr3Config::default();
                 if let Some(packets) = quinn_config.initial_congestion_window_packets {
                     cfg.initial_window(get_congestion_window_bytes(packets));
                 }

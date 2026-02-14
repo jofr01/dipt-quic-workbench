@@ -16,10 +16,11 @@ impl Controller for EcnCc {
         now: Instant,
         sent: Instant,
         bytes: u64,
+        pn: u64,
         app_limited: bool,
         rtt: &RttEstimator,
     ) {
-        self.0.on_ack(now, sent, bytes, app_limited, rtt)
+        self.0.on_ack(now, sent, bytes, pn, app_limited, rtt)
     }
 
     fn on_end_acks(
@@ -38,12 +39,14 @@ impl Controller for EcnCc {
         now: Instant,
         sent: Instant,
         is_persistent_congestion: bool,
+        is_ecn: bool,
         lost_bytes: u64,
+        largest_lost: u64,
     ) {
         // We ignore congestion events triggered by packet loss, forwarding only those triggered by ECN
         if lost_bytes == 0 {
             self.0
-                .on_congestion_event(now, sent, is_persistent_congestion, lost_bytes)
+                .on_congestion_event(now, sent, is_ecn, is_persistent_congestion, lost_bytes, largest_lost)
         }
     }
 
