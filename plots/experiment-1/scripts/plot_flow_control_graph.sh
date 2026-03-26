@@ -14,7 +14,7 @@ python3 ../../scripts/plot_data_transfered.py \
   --input "FC On (Default)=flow_control_on.csv" \
   --input "FC Off (Baseline Profile)=flow_control_off.csv" \
   --title "Comparison: Flow Control Limited Data Transfer" \
-  --output fc_limited_graph.pdf
+  --output ../results/fc_limited_graph.pdf
 
 # Clean up
 rm flow_control_on.csv flow_control_off.csv

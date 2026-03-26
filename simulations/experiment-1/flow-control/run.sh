@@ -6,5 +6,8 @@ cargo run --release --bin quinn-workbench -- \
   --server-ip-address 192.168.30.2 \
   --requests 1 --response-size 10000000
 
-cp MissionControl.pcap ../../../plots/experiment-1/logs/flow-control/MissionControl.pcap
-cp MarsRover.pcap ../../../plots/experiment-1/logs/flow-control/MarsRover.pcap
+DEST_DIR="../../../plots/experiment-1/logs/flow-control/"
+mkdir -p "$DEST_DIR"
+
+cp MissionControl.pcap "$DEST_DIR"
+cp MarsRover.pcap "$DEST_DIR"

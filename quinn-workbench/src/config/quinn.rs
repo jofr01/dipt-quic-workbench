@@ -12,6 +12,8 @@ pub enum CongestionControlAlgorithm {
     /// Configures congestion control to use a variant of `NewReno` that ignores packet
     /// loss and only takes ECN into consideration.
     EcnReno,
+    /// BBR congestion control
+    Bbr,
 }
 
 #[derive(Deserialize, Clone, Default)]

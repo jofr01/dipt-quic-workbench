@@ -39,10 +39,10 @@ for bw in "${UPLINK_BWS[@]}"; do
           --argjson ack "$ack" \
           '
           # Set Uplink Bandwidth
-          (.links[] | select(.id == "DSNUplink->MarsOrbiter").bandwidth_bps) |= $bw |
+          (.links[] | select(.id == "DSNGateway->MarsOrbiter").bandwidth_bps) |= $bw |
 
           # Configure ACK Frequency
-          (.nodes[] | select(.id == "MarsRover" or .id == "MissionControl").quic.ack_eliciting_threshold) |= $ack
+          (.nodes[] | select(.id == "MarsRover" or .id == "MissionControl").quic.ack_frequency_config.ack_eliciting_threshold) |= $ack
           ' "$BASE_CONFIG" > "$CONFIG_FILE"
 
       # Run simulation

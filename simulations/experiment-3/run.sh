@@ -49,7 +49,7 @@ for cca in "${CCA[@]}"; do
          (.nodes[] | select(.id == "MarsRover" or .id == "MissionControl").quic.congestion_controller) |= $cca |
 
          # Configure loss rate
-         (.nodes[] | select(.id == "MarsRover" or .id == "MissionControl").packetLossRatio) |= ($loss / 100.0) |
+         (.nodes[] | select(.id == "MarsRover" or .id == "MissionControl").packet_loss_ratio) |= ($loss / 100.0) |
 
          # Set initial window to 1 BDP (25000) only for CUBIC
          if $cca == "cubic" then
@@ -75,7 +75,7 @@ for cca in "${CCA[@]}"; do
 
       # Move traces
       mv "MarsRover.pcap" "$TEST_OUT_DIR/MarsRover.pcap"
-      mv "MarsRover.qlog" "$TEST_OUT_DIR/MarsRover.qlog"
+      mv "server.qlog" "$TEST_OUT_DIR/MarsRover.qlog"
     done
   done
 done

@@ -9,8 +9,8 @@ EMPTY_EVENTS="events-empty.json"
 
 # Experiment Variables
 CCA=("cubic") 
-# INITIAL_WINDOWS=(10 6250 12500 25000 50000 100000)
-INITIAL_WINDOWS=(200000)
+INITIAL_WINDOWS=(10 6250 12500 25000 50000 100000 200000)
+
 # Fixed Parameters 
 DOWNLOAD_SIZE=1000000000
 
@@ -59,7 +59,7 @@ for cca in "${CCA[@]}"; do
 
     # Move traces
     mv "MarsRover.pcap" "$TEST_OUT_DIR/MarsRover.pcap"
-    mv "MarsRover.qlog" "$TEST_OUT_DIR/MarsRover.qlog"
+    mv "server.qlog" "$TEST_OUT_DIR/MarsRover.qlog"
 
   done
 done

@@ -4,13 +4,13 @@
 #### Config ####
 RESULTS_DIR="../../plots/experiment-5/logs"
 TEMP_DIR="./temp"
-BASE_CONFIG="mars-relay-network-old.json"
+BASE_CONFIG="mars-relay-network.json"
 EMPTY_EVENTS="events-empty.json"
 
 # Experiment Variables
 CCA=("bbr" "no_cc") 
-# OUTAGE_DURATION=(0 15 30 60)
-OUTAGE_DURATION=(0)
+OUTAGE_DURATION=(0 15 30 60)
+
 
 # Fixed Parameters 
 DOWNLOAD_SIZE=1000000000
@@ -72,12 +72,12 @@ for cca in "${CCA[@]}"; do
       --client-ip-address 192.168.10.1 \
       --server-ip-address 192.168.30.2 \
       --requests 1 \
-      --response-size $DOWNLOAD_SIZE 
+      --response-size $DOWNLOAD_SIZE \
       > /dev/null 2>&1
 
     # Move traces
     mv "MarsRover.pcap" "$TEST_OUT_DIR/MarsRover.pcap"
-    mv "MarsRover.qlog" "$TEST_OUT_DIR/MarsRover.qlog"
+    mv "server.qlog" "$TEST_OUT_DIR/MarsRover.qlog"
     mv "MissionControl.pcap" "$TEST_OUT_DIR/MissionControl.pcap"
   done
 done

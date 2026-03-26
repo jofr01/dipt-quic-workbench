@@ -7,7 +7,7 @@ use crate::quinn_extensions::no_cc::NoCCConfig;
 use crate::util::{print_link_stats, print_max_buffer_usage_per_node, print_node_stats};
 use anyhow::Context;
 use in_memory_network::async_rt::time::Instant;
-use quinn_proto::congestion::{CubicConfig, NewRenoConfig};
+use quinn_proto::congestion::{BbrConfig, CubicConfig, NewRenoConfig};
 use quinn_proto::{AckFrequencyConfig, EndpointConfig, QlogConfig, TransportConfig, VarInt};
 use std::fs;
 use std::fs::File;
@@ -166,6 +166,13 @@ fn transport_config(
                     cfg.initial_window(get_congestion_window_bytes(packets));
                 }
                 Arc::new(EcnCcFactory::new(cfg))
+            }
+            CongestionControlAlgorithm::Bbr => {
+                let mut cfg = BbrConfig::default();
+                if let Some(packets) = quinn_config.initial_congestion_window_packets {
+                    cfg.initial_window(get_congestion_window_bytes(packets));
+                }
+                Arc::new(cfg)
             }
         };
     config.congestion_controller_factory(cc_factory);

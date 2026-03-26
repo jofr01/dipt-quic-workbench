@@ -59,7 +59,7 @@ for cca in "${CCA[@]}"; do
 
     # Move traces
     mv "MarsRover.pcap" "$TEST_OUT_DIR/MarsRover.pcap"
-    mv "MarsRover.qlog" "$TEST_OUT_DIR/MarsRover.qlog"
+    mv "server.qlog" "$TEST_OUT_DIR/MarsRover.qlog"
 
   done
 done

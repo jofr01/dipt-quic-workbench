@@ -6,8 +6,8 @@ outage_durations_min = [15, 30, 60]
 total_simulation_time_ms = 20000000 
 
 
-LINK_UPLINK = "DSNUplink->MarsOrbiterUplink"
-LINK_DOWNLINK = "MarsOrbiterDownlink->DSNDownlink"
+LINK_UPLINK = "DSNGateway->MarsOrbiter"
+LINK_DOWNLINK = "MarsOrbiter->DSNGateway"
 
 def generate_events():
     for outage_min in outage_durations_min:
@@ -22,7 +22,7 @@ def generate_events():
 
         current_time_ms = uptime_ms
 
-        # Loop until we exceed the total simulation boundary
+        # Loop until total simulation time is exceeded
         while current_time_ms < total_simulation_time_ms:
             # Link goes DOWN
             events.append({"relative_time_ms": current_time_ms, "link": {"id": LINK_UPLINK, "status": "down"}})
@@ -41,7 +41,6 @@ def generate_events():
             "events": events
         }
 
-        # Filename matches what your bash runner script expects
         filename = f"events-{outage_min}.json"
         
         with open(filename, "w") as f:
