@@ -5,6 +5,7 @@
       "id": "MissionControl",
       "type": "host",
       "buffer_size_bytes": 250000,
+      "packet_loss_ratio": 0.01,
       "interfaces": [
         {
           "addresses": [
@@ -22,23 +23,23 @@
         }
       ],
       "quic": {
-        "initial_rtt_ms": 480000,
-        "maximum_idle_timeout_ms": 4560000,
+        "initial_rtt_ms": 1200000,
+        "maximum_idle_timeout_ms": 2400000,
         "packet_threshold": 3,
         "mtu_discovery": false,
         "maximize_send_and_receive_windows": true,
-        "congestion_controller": "bbr",
+        "congestion_controller": "cubic",
         "initial_congestion_window_packets": 10,
         "ack_frequency_config": {
-          "max_ack_delay_ms": 25,
+          "max_ack_delay_ms": 1000,
           "ack_eliciting_threshold": 1
         }
       }
     },
     {
-      "id": "DSNUplink",
+      "id": "DSNGateway",
       "type": "router",
-      "buffer_size_bytes": 1000000000,
+      "buffer_size_bytes": 120000000,
       "interfaces": [
         {
           "addresses": [
@@ -65,32 +66,9 @@
       ]
     },
     {
-      "id": "DSNDownlink",
+      "id": "MarsOrbiter",
       "type": "router",
-      "buffer_size_bytes": 1000000000,
-      "interfaces": [
-        {
-          "addresses": [
-            {
-              "address": "192.168.10.3/24"
-            }
-          ],
-          "routes": []
-        },
-        {
-          "addresses": [
-            {
-              "address": "192.168.40.1/24"
-            }
-          ],
-          "routes": []
-        }
-      ]
-    },
-    {
-      "id": "MarsOrbiterUplink",
-      "type": "router",
-      "buffer_size_bytes": 1000000000,
+      "buffer_size_bytes": 120000000,
       "interfaces": [
         {
           "addresses": [
@@ -98,7 +76,13 @@
               "address": "192.168.20.2/24"
             }
           ],
-          "routes": []
+          "routes": [
+            {
+              "destination": "192.168.10.0/24",
+              "next": "192.168.20.1",
+              "cost": 100
+            }
+          ]
         },
         {
           "addresses": [
@@ -111,38 +95,10 @@
       ]
     },
     {
-      "id": "MarsOrbiterDownlink",
-      "type": "router",
-      "buffer_size_bytes": 1000000000,
-      "interfaces": [
-        {
-          "addresses": [
-            {
-              "address": "192.168.40.2/24"
-            }
-          ],
-          "routes": [
-            {
-              "destination": "192.168.10.0/24",
-              "next": "192.168.40.1",
-              "cost": 100
-            }
-          ]
-        },
-        {
-          "addresses": [
-            {
-              "address": "192.168.30.3/24"
-            }
-          ],
-          "routes": []
-        }
-      ]
-    },
-    {
       "id": "MarsRover",
       "type": "host",
       "buffer_size_bytes": 250000,
+      "packet_loss_ratio": 0.01,
       "interfaces": [
         {
           "addresses": [
@@ -153,22 +109,22 @@
           "routes": [
             {
               "destination": "192.168.10.0/24",
-              "next": "192.168.30.3",
+              "next": "192.168.30.1",
               "cost": 100
             }
           ]
         }
       ],
       "quic": {
-        "initial_rtt_ms": 480000,
-        "maximum_idle_timeout_ms": 4560000,
+        "initial_rtt_ms": 1200000,
+        "maximum_idle_timeout_ms": 2400000,
         "packet_threshold": 3,
         "mtu_discovery": false,
         "maximize_send_and_receive_windows": true,
-        "congestion_controller": "bbr",
-        "initial_congestion_window_packets": 10,
+        "congestion_controller": "no_cc",
+        "initial_congestion_window_packets": 100000,
         "ack_frequency_config": {
-          "max_ack_delay_ms": 25,
+          "max_ack_delay_ms": 1000,
           "ack_eliciting_threshold": 1
         }
       }
@@ -176,88 +132,46 @@
   ],
   "links": [
     {
-      "id": "MissionControl->DSNUplink",
+      "id": "MissionControl->DSNGateway",
       "source": "192.168.10.1",
       "target": "192.168.10.2",
       "delay_ms": 10,
       "bandwidth_bps": 100000000
     },
     {
-      "id": "DSNDownlink->MissionControl",
-      "source": "192.168.10.3",
-      "target": "192.168.10.1",
-      "delay_ms": 10,
-      "bandwidth_bps": 100000000
-    },
-    {
-      "id": "DSNUplink->MarsOrbiterUplink",
-      "source": "192.168.20.1",
-      "target": "192.168.20.2",
-      "delay_ms": 240000,
-      "bandwidth_bps": 2000000
-    },
-    {
-      "id": "MarsOrbiterDownlink->DSNDownlink",
-      "source": "192.168.40.2",
-      "target": "192.168.40.1",
-      "delay_ms": 240000,
-      "bandwidth_bps": 2000000
-    },
-    {
-      "id": "MarsOrbiterUplink->MarsRover",
-      "source": "192.168.30.1",
-      "target": "192.168.30.2",
-      "delay_ms": 10,
-      "bandwidth_bps": 100000000
-    },
-    {
-      "id": "MarsRover->MarsOrbiterDownlink",
-      "source": "192.168.30.2",
-      "target": "192.168.30.3",
-      "delay_ms": 10,
-      "bandwidth_bps": 100000000
-    },
-    {
-      "id": "DSNUplink->MissionControl",
+      "id": "DSNGateway->MissionControl",
       "source": "192.168.10.2",
       "target": "192.168.10.1",
       "delay_ms": 10,
       "bandwidth_bps": 100000000
     },
     {
-      "id": "MissionControl->DSNDownlink",
-      "source": "192.168.10.1",
-      "target": "192.168.10.3",
-      "delay_ms": 10,
-      "bandwidth_bps": 100000000
+      "id": "DSNGateway->MarsOrbiter",
+      "source": "192.168.20.1",
+      "target": "192.168.20.2",
+      "delay_ms": 240000,
+      "bandwidth_bps": 2000000
     },
     {
-      "id": "MarsRover->MarsOrbiterUplink",
-      "source": "192.168.30.2",
-      "target": "192.168.30.1",
-      "delay_ms": 10,
-      "bandwidth_bps": 100000000
-    },
-    {
-      "id": "MarsOrbiterDownlink->MarsRover",
-      "source": "192.168.30.3",
-      "target": "192.168.30.2",
-      "delay_ms": 10,
-      "bandwidth_bps": 100000000
-    },
-    {
-      "id": "MarsOrbiterUplink->DSNUplink",
+      "id": "MarsOrbiter->DSNGateway",
       "source": "192.168.20.2",
       "target": "192.168.20.1",
       "delay_ms": 240000,
       "bandwidth_bps": 2000000
     },
     {
-      "id": "DSNDownlink->MarsOrbiterDownlink",
-      "source": "192.168.40.1",
-      "target": "192.168.40.2",
-      "delay_ms": 240000,
-      "bandwidth_bps": 2000000
+      "id": "MarsOrbiter->MarsRover",
+      "source": "192.168.30.1",
+      "target": "192.168.30.2",
+      "delay_ms": 10,
+      "bandwidth_bps": 100000000
+    },
+    {
+      "id": "MarsRover->MarsOrbiter",
+      "source": "192.168.30.2",
+      "target": "192.168.30.1",
+      "delay_ms": 10,
+      "bandwidth_bps": 100000000
     }
   ]
 }

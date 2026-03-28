@@ -50,7 +50,7 @@ def main():
 
     # Process each outage duration
     for duration_min, runs in groups.items():
-        print(f"\nProcessing Outage Duration: {duration_min} minutes")
+        print(f"Processing Outage Duration: {duration_min} minutes")
         runs.sort(key=lambda x: x[0])
         
         plot_inputs = []
@@ -62,7 +62,7 @@ def main():
             
             # Extract Throughput 
             if not os.path.exists(csv_path):
-                print(f"  Extracting throughput for {cca.upper()}...")
+                print(f"Extracting throughput for {cca.upper()}...")
                 cmd_extract = [
                     sys.executable, SCRIPT_EXTRACT_TPUT,
                     "--pcap", pcap,
@@ -76,6 +76,8 @@ def main():
                 durations.append(duration)
 
             label = f"{cca.upper()}"
+            if label == "NO_CC":
+                label = "Fixed Rate"
             plot_inputs.append(f"{label}={csv_path}")
             temp_files.append(csv_path)
         
@@ -88,7 +90,7 @@ def main():
             x_limit = 5000
             calc_binsize = 10.0
 
-        output_pdf = os.path.join(RESULTS_DIR, f"sender_throughput_outage_{duration_min}m.pdf")
+        output_pdf = os.path.join(RESULTS_DIR, f"sender_throughput_outage_{duration_min}.pdf")
         title = f"Sender Throughput ({duration_min} min Outage)"
         
         # Build Plot Command
