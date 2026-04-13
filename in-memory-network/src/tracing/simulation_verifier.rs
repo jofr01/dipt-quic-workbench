@@ -667,7 +667,7 @@ mod replayed {
                 .packets_in_bandwidth_window
                 .front()
                 .is_some_and(|first| {
-                    first.0 + Duration::from_secs(window_seconds) < packet_sent_time
+                    first.0 + Duration::from_secs(window_seconds) <= packet_sent_time
                 })
             {
                 let (_, bits) = self.packets_in_bandwidth_window.pop_front().unwrap();

@@ -159,19 +159,23 @@ impl NetworkLink {
             data.transmit.ecn = Some(EcnCodepoint::from_bits(0b11).unwrap())
         }
 
-        // Record
+        // Pacer
+        let packet_size = data.transmit.packet_size();
+        let mut pacer = self.pacer.lock();
+        pacer.track_send(Instant::now(), packet_size);
+        let effective_sent_time = pacer.last_send.as_ref().unwrap().send_done;
+        drop(pacer);
+
+        // Trace
         self.tracer.track_packet_in_transit(src_node, self, &data);
 
-        // Send
-        self.pacer
-            .lock()
-            .track_send(Instant::now(), data.transmit.packet_size());
-        src_node
-            .outbound_buffer()
-            .release(data.transmit.packet_size());
+        // Release buffer space
+        src_node.outbound_buffer().release(packet_size);
+
+        // Send to the inbound queue using the 'finish' time
         self.in_transit
             .lock()
-            .send(data, self.delay + anomalies.extra_delay);
+            .send_at(data, effective_sent_time, self.delay + anomalies.extra_delay);
     }
 
     pub(crate) async fn sleep_until_ready_to_send(
@@ -222,7 +226,10 @@ impl NetworkLink {
             return false;
         }
 
-        self.pacer.lock().can_send(Instant::now())
+        // Check if the pacer debt is currently within the "burst" allowance
+        let now = Instant::now();
+        let duration = self.pacer.lock().duration_until_can_send(now);
+        duration.is_zero()
     }
 
     pub(crate) fn next_delivered_packets(&mut self, max_transmits: usize) -> NextPacketDelivery {
@@ -250,30 +257,49 @@ impl PacketPacer {
     }
 
     fn can_send(&mut self, now: Instant) -> bool {
-        let Some(packet) = self.last_send.clone() else {
-            // No packet has been sent yet
-            return true;
-        };
-
-        packet.send_done <= now
+        // Allow sending if the debt is less than 1ms
+        self.duration_until_can_send(now).is_zero()
     }
 
     fn duration_until_can_send(&self, now: Instant) -> Duration {
         match &self.last_send {
             None => Duration::default(),
-            Some(p) => p
-                .send_done
-                .into_std()
-                .saturating_duration_since(now.into_std()),
+            Some(p) => {
+                let debt = p
+                    .send_done
+                    .into_std()
+                    .saturating_duration_since(now.into_std());
+                let threshold = Duration::from_millis(1);
+
+                if debt < threshold {
+                    Duration::default()
+                } else {
+                    // Sleep for the excess beyond the 1ms buffer.
+                    // This ensures the link stays saturated during the sleep.
+                    debt.saturating_sub(threshold)
+                }
+            }
         }
     }
 
     fn track_send(&mut self, now: Instant, packet_size_bytes: usize) {
         let packet_size_bits = packet_size_bytes.saturating_mul(8);
-        let send_duration_ms = packet_size_bits as f64 / self.bandwidth_bps * 1_000.0;
+
+        // Calculate transmission duration with nanosecond precision for high accuracy
+        let send_duration_ns =
+            packet_size_bits as f64 / self.bandwidth_bps as f64 * 1_000_000_000.0;
+        let duration = Duration::from_nanos(send_duration_ns.ceil() as u64);
+
+        // Determine the start time for this packet:
+        // If the link was idle, start now.
+        // If the link is still busy (send_done > now), start when the previous packet finishes.
+        let start_time = match &self.last_send {
+            Some(last) if last.send_done > now => last.send_done,
+            _ => now,
+        };
 
         self.last_send = Some(SendingPacket {
-            send_done: now + Duration::from_millis(send_duration_ms.ceil() as u64),
+            send_done: start_time + duration,
         });
     }
 }

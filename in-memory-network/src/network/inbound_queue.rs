@@ -33,6 +33,18 @@ impl InboundQueue {
         }
     }
 
+    pub(crate) fn send_at(&mut self, data: InTransitData, sent: Instant, delay: Duration) {
+        self.queue.push(PrioritizedInTransitData {
+            data,
+            sent, // Use the pacer-calculated time
+            delay,
+        });
+
+        for waker in self.notify_new_transmits.drain(..) {
+            waker.wake();
+        }
+    }
+
     pub(crate) fn receive(this: Arc<Mutex<Self>>, max_transmits: usize) -> NextPacketDelivery {
         NextPacketDelivery::new(this.clone(), max_transmits)
     }
