@@ -2,7 +2,7 @@
 
 
 #### Config ####
-RESULTS_DIR="../../../plots/experiment-2/logs/baseline"
+RESULTS_DIR="../../../plots/experiment-2/logs/control"
 TEMP_DIR="./temp"
 BASE_CONFIG="mars-relay-network.json"
 EMPTY_EVENTS="events-empty.json"
@@ -20,7 +20,7 @@ DOWNLOAD_SIZE=1000000000
 mkdir -p "$RESULTS_DIR"
 mkdir -p "$TEMP_DIR"
 
-echo "Starting Experiment 2 Baseline Simulations..."
+echo "Starting Experiment 2 Control Scenario Simulations..."
 
 for cca in "${CCA[@]}"; do
   for iw in "${INITIAL_WINDOWS[@]}"; do
