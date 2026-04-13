@@ -180,6 +180,9 @@ This experiment evaluates the performance of different congestion controllers in
 First, we run a baseline comparison of CUBIC, NewReno, BBRv1 and BBRv3.
 The results of those runs can be plotted with the `plot_baseline_cwnd_comparison.py` and `plot_baseline_throughput_comparison.py` scripts.
 
+Second, we run a control scenario with same BDP, but low latency with CUBIC, NewReno and BBRv1.
+The results of those runs can be plotted with the `plot_control_cwnd_comparison.py` and `plot_control_throughput_comparison.py` scripts.
+
 After that, we tests if tuning the initial window to the real BDP size can help improving the performance.
 These tests are conducted using CUBIC.
 The results can be plotted using the scripts `plot_cubic_init_window_tuning_cwnd.py` and `plot_cubic_init_window_tuning_fct.py`.  

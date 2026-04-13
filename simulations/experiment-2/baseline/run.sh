@@ -20,7 +20,7 @@ DOWNLOAD_SIZE=1000000000
 mkdir -p "$RESULTS_DIR"
 mkdir -p "$TEMP_DIR"
 
-echo "Starting Experiment 4 Simulations..."
+echo "Starting Experiment 2 Baseline Simulations..."
 
 for cca in "${CCA[@]}"; do
   for iw in "${INITIAL_WINDOWS[@]}"; do
