@@ -47,11 +47,6 @@ def main():
             uplink_bps = int(match.group(1))
             ack_ratio = int(match.group(2))
             loss_rate = int(match.group(3))
-            seed = match.group(4)
-            
-            # Only plot first run for each lossy scenario
-            if seed is not None and seed != "1":
-                continue
             
             pcap = os.path.join(folder, "MissionControl.pcap")
             

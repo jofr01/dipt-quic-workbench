@@ -71,7 +71,7 @@ def main():
     plt.figure(figsize=(10, 5))
     
     # Custom color logic
-    colors = ["tab:red" if x > 100 else "tab:green" for x in df["Utilization (%)"]]
+    colors = ["tab:red" if round(x) >= 100 else "tab:green" for x in df["Utilization (%)"]]
                           
     # Draw bar chart
     ax = sns.barplot(

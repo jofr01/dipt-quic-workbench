@@ -101,7 +101,9 @@ def main():
         hue="Configuration", 
         style="Configuration",
         palette="tab10",
-        dashes=False
+        dashes=False,
+        errorbar="sd",
+        estimator="mean"
     )
 
     # Reference Line
