@@ -100,7 +100,9 @@ def main():
             "--output", output_pdf,
             "--binsize", str(calc_binsize), 
             "--ylabel", "Throughput (Mbps)",
-            "--xlim", str(x_limit)
+            "--xlim", str(x_limit),
+            "--outage-duration", str(duration_min),
+            "--outage-offset", "240"
         ]
         
         for inp in plot_inputs:

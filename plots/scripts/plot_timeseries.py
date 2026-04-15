@@ -72,6 +72,10 @@ def main():
     parser.add_argument("--capacity", type=float, default=None, help="Reference Line Value")
     parser.add_argument("--xlim", type=float, default=None, help="Limit X-axis (seconds)")
     parser.add_argument("--binsize", type=float, default=1.0, help="Calculation Intervall (seconds)")
+    # Optional markers for link outages
+    parser.add_argument("--outage-duration", type=float, default=0.0, help="Outage duration in minutes")
+    parser.add_argument("--outage-offset", type=float, default=240.0, help="Simulation start offset in seconds")
+
     
     args = parser.parse_args()
 
@@ -108,7 +112,7 @@ def main():
 
     # Reference Line
     if args.capacity:
-        plt.axhline(y=args.capacity, color='red', linestyle='--', alpha=0.6, 
+        plt.axhline(y=args.capacity, color='tab:red', linestyle='--', alpha=0.6, 
                    label=f"Reference")
 
     # Formatting
@@ -123,6 +127,44 @@ def main():
         plt.xlim(0, args.xlim)
     else:
         plt.xlim(left=0)
+
+    # Outage marker
+    if args.outage_duration > 0:
+        d_sec = args.outage_duration * 60
+        cycle_sec = 3 * d_sec
+        offset = args.outage_offset
+        
+        # Determine the maximum x value to stop drawing lines
+        max_x = args.xlim if args.xlim else full_df["Time (s)"].max()
+        
+        k = 0
+        added_labels = False
+        
+        while True:
+            # Calculate absolute simulation times
+            t_sim_start = (2 * d_sec) + (k * cycle_sec)
+            t_sim_end = t_sim_start + d_sec
+            
+            # Shift times to match the plot x-axis
+            t_plot_start = t_sim_start - offset
+            t_plot_end = t_sim_end - offset
+            
+            # Stop if the next start line is beyond the plot limits
+            if t_plot_start > max_x:
+                break
+                
+            # Draw Outage Start (Red dotted line)
+            if t_plot_start >= 0:
+                plt.axvline(x=t_plot_start, color='tab:red', linestyle=':', linewidth=1.5, alpha=0.8,
+                            label="Outage Start" if not added_labels else "")   # Only add labels once
+                            
+            # Draw Outage End (Green dashed-dotted line)
+            if t_plot_end <= max_x and t_plot_end >= 0:
+                plt.axvline(x=t_plot_end, color='tab:green', linestyle='-.', linewidth=1.5, alpha=0.8,
+                            label="Outage End" if not added_labels else "")
+                            
+            added_labels = True
+            k += 1
 
     plt.legend(loc="lower right")
     plt.tight_layout()
