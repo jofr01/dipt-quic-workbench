@@ -47,11 +47,6 @@ def main():
         if match:
             cca_name = match.group(1)
             loss_rate = match.group(2)
-            seed = match.group(3)
-            
-            # Only plot seed 1 for the time-series comparison
-            if seed != "1":
-                continue
 
             qlog = os.path.join(folder, "MarsRover.qlog")
             
