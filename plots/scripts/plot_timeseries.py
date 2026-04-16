@@ -43,9 +43,36 @@ def load_and_process(path, label, bin_size):
             # Throughput Mode: Convert Bytes/Bin to Mbps
             grouped = df.groupby("time_bin")["len"].sum()
             values = (grouped * 8) / 1_000_000 / bin_size
+            
+            if not values.empty:
+                max_bin = values.index.max()
+                # Create timeline up to runs last packet
+                full_timeline = [i * bin_size for i in range(int(max_bin / bin_size) + 1)]
+                # Reindex and fill missing intermediate bins with 0
+                values = values.reindex(full_timeline).fillna(0)
+            
         elif "cwnd" in df.columns:
-            # CWND Mode: Average value, convert Bytes to MB
+            # CWND Mode: Highest value in bin (capture the operating window, filter out probing), convert Bytes to MB
             values = df.groupby("time_bin")["cwnd"].mean() / 1_000_000
+            
+            if not values.empty:
+                max_bin = values.index.max()
+                # Create timeline up to runs last event
+                full_timeline = [i * bin_size for i in range(int(max_bin / bin_size) + 1)]
+                # Reindex and forward-fill missing intermediate bins
+                values = values.reindex(full_timeline).ffill().bfill()
+
+        elif "latest_rtt" in df.columns:
+            # RTT Mode: Highest value in bin (we are interested in peaks)
+            values = df.groupby("time_bin")["latest_rtt"].max()
+            
+            if not values.empty:
+                max_bin = values.index.max()
+                # Create timeline up to runs last event
+                full_timeline = [i * bin_size for i in range(int(max_bin / bin_size) + 1)]
+                # Reindex and forward-fill missing intermediate bins
+                values = values.reindex(full_timeline).ffill().bfill()
+            
         else:
             # Fallback
             val_col = df.columns[1]
