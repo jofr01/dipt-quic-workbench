@@ -134,7 +134,8 @@ def main():
         palette="tab10",
         dashes=False,
         errorbar="sd",
-        estimator="mean"
+        estimator="mean",
+        err_kws={'rasterized': True}
     )
 
     # Reference Line
@@ -196,7 +197,7 @@ def main():
     plt.legend(loc="lower right")
     plt.tight_layout()
     
-    plt.savefig(args.output)
+    plt.savefig(args.output, dpi=600)
     print(f"Success! Plot saved to {args.output}")
 
 if __name__ == "__main__":
