@@ -7,6 +7,20 @@ With the `run_all.sh` scripts all scenarios belonging to an experiment will be e
 With the `run_everything` script, all experiments will be executed (might take a while).
 Before executing anything ensure that enough storage (300 GB) and memory (min 8 GB) is available.
 
+## Requirements
+
+To run the simulations, your system must have the following tools installed:
+
+* **jq** - version 1.8.1 (Used for command-line parsing of JSON data)
+* **Python** - version 3.13 (Used for generating dynamic event scenarios in Experiment 5)
+
+
+### Installing System Tools
+```bash
+sudo apt-get update
+sudo apt-get install jq
+```
+
 ## Verification and Validation Remarks
 For validation we require log data from some benchmark simulation run with help of the QUIC Interop Runner.
 This needs to be executed from a seperate [repository](https://git.kom.e-technik.tu-darmstadt.de/student/theses/frisch-johannes-ma/ns-3-docker-emulation).

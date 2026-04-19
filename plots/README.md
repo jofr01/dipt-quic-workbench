@@ -4,6 +4,26 @@ The scripts in this folder are used to generate the plots for this thesis.
 Therefore, the pcaps and qlog files from QUIC Workbench simulations have to be placed in the respective folders.
 Executing the simulations using the run scripts will automatically update the traces.
 
+## Requirements
+
+To process the simulation traces and generate the plots, your system must have the following tools installed:
+
+* **tshark** - version 4.4.9 (Used to extract raw packet metrics from `.pcap` files)
+* **jq** - version 1.8.1 (Used for command-line parsing of JSON data)
+* **Python** - version 3.13
+
+### Installing System Tools
+```bash
+sudo apt-get update
+sudo apt-get install tshark jq
+```
+### Installing Python Dependencies
+The data processing and plotting scripts rely on a few Python packages.
+You can install the exact versions used in this thesis via the provided requirements.txt file:
+```bash
+pip install -r requirements.txt
+```
+
 ## Scripts
 
 In the `/scripts` folder you can find generalized processing scripts to extract the different metrics.

@@ -1,3 +1,13 @@
+Masterthesis: Evaluation of QUIC in Interplanetary Networks
+===========================================================
+This repository contains the simulation code and data processing pipeline used in the thesis.
+The [`/simulations`](simulations) directory contains everything to run the experiments as described in the thesis.
+The [`/plots`](plots) directory contains everything regarding processing and plotting of results.
+
+Below you can find the original QUIC Workbench documentation to get an overview over the tool and get started with running your own simulations.
+
+
+
 QUIC Workbench
 ==============
 
