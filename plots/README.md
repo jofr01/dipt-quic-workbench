@@ -43,7 +43,7 @@ python3 extract_throughput.py \
 
 ### 2. `plot_timeseries.py`
 **Purpose:** Generates timeseries plots from one or more CSV files (Throughput or CWND)  
-**Method:** Auto-detects data type (packet len vs cwnd) to switch between throughput calculation (sum + Mbps conversion) and raw value averaging  
+**Method:** Auto-detects data type (packet len vs cwnd) to switch between throughput calculation (sum + Mbps conversion) and raw value averaging. If multiple identically labeled inputs are provided, the mean value together with continous error bars is plotted.  
 **Usage:**
 ```bash
 python3 plot_timeseries.py \
@@ -194,7 +194,7 @@ To calculate the protocol overhead caused by spurius retransmission the script `
 To generate the staircase plot showcasing flow control limitation the `plot_flow_control_graph.py` is used.  
 
 
-## Experiment 2: High BDP Challenge
+## Experiment 2: Challenges of Extreme Latencies and High BDP
 This experiment evaluates the performance of different congestion controllers in the extreme LFN scenario we find in deep space.  
 
 First, we run a baseline comparison of CUBIC, NewReno, BBRv1 and BBRv3.
@@ -221,7 +221,17 @@ The objective of this experiment is to quantify the performance degradation of Q
 
 `plot_heatmaps.py` generates heatmaps that are summarizing the performance for all combinations of uplink bandwidth and ACK ratio.
 `plot_reverse_path_saturation.py` generates bar charts that show the saturation of the uplink for all scenarios.
-A saturation above 100% indicates that there is ACK congestion.
+A saturation of 100% or higher indicates that there is ACK congestion.
 For all scenarios with loss we averaged the results over 5 indepent runs and show the mean and standard deviation.  
 
 `plot_throughput_comparison.py` generates timeseries throughput plots to allow analysis of the dynamical behavior of the endpoints.  
+
+
+## Experiment 5: Intermittency
+The objective of this experiment is to test if QUIC can handle link dirsruptions.
+
+`plot_throughput.py` generates timeseries throughput plots to allow analysis of the dynamical behavior of the endpoints. The outages are getting marked by vertical dashed lines.  
+
+`plot_bbr_rtt_comparison.py` generates the timeseries RTT measurment plots, showing how disruptions result in RTT spikes from the CCA's perspective. 
+`plot_bbr_cwnd_comparison.py` generates the corresponding timeseries congestion window plots.
+
